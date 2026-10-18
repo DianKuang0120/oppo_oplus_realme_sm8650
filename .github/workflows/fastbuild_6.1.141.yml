@@ -494,6 +494,9 @@ jobs:
             echo "CONFIG_BTRFS_FS=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_BTRFS_FS_POSIX_ACL=y" >> ./arch/arm64/configs/gki_defconfig
             echo "CONFIG_DEVMEM=y" >> ./arch/arm64/configs/gki_defconfig
+            echo "CONFIG_STRICT_DEVMEM=n" >> ./arch/arm64/configs/gki_defconfig
+            echo "CONFIG_IO_STRICT_DEVMEM=n" >> ./arch/arm64/configs/gki_defconfig
+            echo "CONFIG_DEVTMPFS_MOUNT=y" >> ./arch/arm64/configs/gki_defconfig
             # 未经测试的配置选项，可能导致bug
             #echo "CONFIG_CGROUP_DEVICE=y" >> ./arch/arm64/configs/gki_defconfig
             #echo "CONFIG_CGROUP_PIDS=y" >> ./arch/arm64/configs/gki_defconfig
