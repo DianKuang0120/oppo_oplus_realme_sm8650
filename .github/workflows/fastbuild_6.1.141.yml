@@ -560,7 +560,29 @@ jobs:
               sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
             done
           fi
-           
+      - name: 修复 Clang20 下 libbpf const 限定符编译错误
+        run: |
+          cd kernel_workspace/common
+          LIBBPF="tools/lib/bpf/libbpf.c"
+          if [ ! -f "$LIBBPF" ]; then
+            echo "未找到 $LIBBPF，跳过补丁"; exit 0
+          fi
+    
+          # 方案A：对 strchr 返回值做显式转换（最精准，不动变量语义）
+          if grep -q 'next_path = strchr(s,' "$LIBBPF"; then
+            sed -i 's/next_path = strchr(s,/next_path = (char *)strchr(s,/' "$LIBBPF"
+            echo "[A] 已为 next_path 的 strchr 返回值添加 (char *) 转换"
+          fi
+    
+          # 方案B：兜底，如果上面没命中，尝试把 next_path 声明改成 const
+          if ! grep -q 'next_path = (char \*)strchr' "$LIBBPF"; then
+            sed -i 's/^\(\s*\)char \*next_path;/\1const char *next_path;/' "$LIBBPF"
+            echo "[B] 已尝试将 next_path 声明改为 const char *"
+          fi
+    
+          # 结果确认
+          echo "--- 补丁后相关行 ---"
+          grep -n -E 'next_path\s*=|char \*next_path|const char \*next_path' "$LIBBPF" | head -20           
       - name: 构建内核
         run: |
           WORKDIR="$(pwd)"
